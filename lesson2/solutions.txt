@@ -1,0 +1,38 @@
+1)	Q: type of "([True, True], ['a', 'a'])
+	A: ([Bool], [Char])
+
+2)	Q: type of "[tail, init, reverse]"
+	A: [[a] -> [a]]
+
+3)	Q: write definitions that have the following type:
+		a. bools :: [Bool]
+		b. nums :: [[Num]]
+		c. add :: Int -> Int -> Int -> Int
+		d. copy :: a -> (a, a)
+		e. apply :: (a -> b) -> a -> b
+	A:
+		a. bools = [True, False]
+		b. nums = [[1,2], [3,4]]
+
+		// NOTE: here the compiler can only infer that a, b and c are Num
+		c. add a b c = a + b + c
+		
+		d. copy x = (x, x)
+		e. apply f x = f x
+
+4)	Q: type of following functions:
+		a. swap (x, y) = (y, x)
+		b. second xs = head (tail xs)
+		c. pair x y = (x, y)
+		d. palindrome xs = reverse xs == xs
+		e. twice f x = f (f x)
+	A:
+		// NOTE: components of a tuble may be of different type: thus we must be as general as possible
+		a. (a, b) -> (b, a)
+
+		// NOTE: "xs" must be "[a]" because it's the argument of "tail". The return type must be "a", the return type of "head"
+		b. [a] -> a
+
+		c. a -> b -> (a, b)
+		d. Eq a => [a] -> Bool
+		e. (b -> b) -> b -> b
