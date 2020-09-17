@@ -7,7 +7,10 @@ module Parse where
 -- import module Log (custom datatypes and tests)
 -- import Log
 
+
+
 main :: IO ()
 main = do
  content <- readFile "sample.log"
- mapM_ print (lines content)
+ parse (head (lines content))
+ putStrLn "Hei"
