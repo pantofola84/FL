@@ -78,7 +78,7 @@ isTimeStampLower lm1 lm2 = (extractTimeStamp lm1) < (extractTimeStamp lm2)
 
 -- insert a LogMessage into an existing MessageTree. If the LogMessage is Unknown then do nothing
 insert :: LogMessage -> MessageTree -> MessageTree
-insert (Unknown _) tree 					= tree
+insert (Unknown str) tree 					= tree
 insert logMessage Leaf 						= Node Leaf logMessage Leaf
 insert logMessage (Node leftTree nodeLogMessage rightTree) 	= if isTimeStampLower logMessage nodeLogMessage then insert logMessage leftTree else insert logMessage rightTree
 
