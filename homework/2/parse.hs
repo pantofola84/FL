@@ -22,6 +22,7 @@ validLength :: [String] -> Bool -> Bool
 validLength t True 	= length t >= 4
 validLength t False 	= length t >= 3
 
+
 -- given a string, returns true if it's a valid timestamp
 isValidTimeStamp :: String -> Bool
 isValidTimeStamp [] 		= False
@@ -34,6 +35,7 @@ readAndValidate :: (Ord a, Num a) => Maybe a -> Bool
 readAndValidate x = case x of
  Nothing 	-> False
  Just a 	-> (a < 101) && (a > 0)
+
 
 -- given a trimmed string, returns true if it is a valid Info LogMessage
 isInfo :: [String] -> Bool
@@ -72,14 +74,21 @@ extractTimeStamp :: LogMessage -> TimeStamp
 extractTimeStamp (LogMessage _ timeStamp _) 	= timeStamp
 extractTimeStamp (Unknown _) 			= -1
 
+
 -- True if first parameter TimeStamp is strictly lower than second parameter's one
 isTimeStampLower :: LogMessage -> LogMessage -> Bool
 isTimeStampLower lm1 lm2 = (extractTimeStamp lm1) < (extractTimeStamp lm2)
+
 
 -- insert a LogMessage into an existing MessageTree. If the LogMessage is Unknown then do nothing
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _) tree 					= tree
 insert logMessage Leaf 						= Node Leaf logMessage Leaf
 insert logMessage (Node leftTree nodeLogMessage rightTree) 	= if isTimeStampLower logMessage nodeLogMessage then insert logMessage leftTree else insert logMessage rightTree
+
+
+-- build a MessageTree from a list of LogMessages, starting with a Leaf (the empty tree)
+build :: [LogMessage] -> MessageTree
+build logMessageList = foldl (\ t lm -> insert lm t) Leaf logMessageList
 
 -----------------------------------------     MESSAGETREE    -----------------------------------------------------------------------------------------------------------------------
