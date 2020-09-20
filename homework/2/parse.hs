@@ -55,13 +55,17 @@ isError s = ((s !! 0) == "E")	&&
 
 
 -- given a string, returns the corresponding LogMessage
-parse :: String -> LogMessage
-parse s
+parseMessage :: String -> LogMessage
+parseMessage s
  | validLength trimmedS True && isError trimmedS		= LogMessage (Error (read (trimmedS !! 1)::Int)) (read (trimmedS !! 2)::Int) (unwords (drop 3 trimmedS))
  | validLength trimmedS False && isWarning trimmedS		= LogMessage Warning (read (trimmedS !! 1)::Int) (unwords (drop 2 trimmedS))
  | validLength trimmedS False && isInfo trimmedS		= LogMessage Info (read (trimmedS !! 1)::Int) (unwords (drop 2 trimmedS))
  | otherwise							= Unknown s
  where trimmedS = words s
+ 
+-- parse given a String representing the whole Log file, parses every line into a LogMessage
+parse :: String -> [LogMessage]
+parse text = map parseMessage (lines text)
 
 -----------------------------------------     PARSE    -----------------------------------------------------------------------------------------------------------------------
 
@@ -75,20 +79,25 @@ extractTimeStamp (LogMessage _ timeStamp _) 	= timeStamp
 extractTimeStamp (Unknown _) 			= -1
 
 
--- True if first parameter TimeStamp is strictly lower than second parameter's one
-isTimeStampLower :: LogMessage -> LogMessage -> Bool
-isTimeStampLower lm1 lm2 = (extractTimeStamp lm1) < (extractTimeStamp lm2)
-
-
 -- insert a LogMessage into an existing MessageTree. If the LogMessage is Unknown then do nothing
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _) tree 					= tree
 insert logMessage Leaf 						= Node Leaf logMessage Leaf
-insert logMessage (Node leftTree nodeLogMessage rightTree) 	= if isTimeStampLower logMessage nodeLogMessage then insert logMessage leftTree else insert logMessage rightTree
+insert logMessage (Node leftTree nodeLogMessage rightTree) 	= if (extractTimeStamp logMessage) < (extractTimeStamp nodeLogMessage)
+ then Node (insert logMessage leftTree) nodeLogMessage rightTree
+ else Node leftTree nodeLogMessage (insert logMessage rightTree)
 
 
 -- build a MessageTree from a list of LogMessages, starting with a Leaf (the empty tree)
 build :: [LogMessage] -> MessageTree
-build logMessageList = foldl (\ t lm -> insert lm t) Leaf logMessageList
+build [] = Leaf
+build (f : r) = insert f (build r)
+
+
+-- takes a MessageTree and generates a list of its LogMessages sorted by TimeStamp
+inOrder :: MessageTree -> [LogMessage]
+inOrder Leaf = []
+inOrder (Node leftTree lm rightTree) = inOrder leftTree ++ [lm] ++ inOrder rightTree
+
 
 -----------------------------------------     MESSAGETREE    -----------------------------------------------------------------------------------------------------------------------
