@@ -1,4 +1,4 @@
---Polymorphic type that represents a Parser of type a, e.g. Parser Int is a parser for Int.
+--Polymorphic type that represents a Parser of type a, e.g. Parser Int is a parser for type Int.
 --A parser is essentially a function that takes a String: a prefix of the String is parsed and a couple in the form
 --(a, String) is returned, where the first element is the result of the parsing, and the second element is what remains
 --of the String to be parsed
@@ -44,5 +44,64 @@ item = Parser $ (\s -> case s of
  "" = []
  (ch:chs) = [(ch, chs)])
 
+--One can imagine a Parser as a "little box" that takes a specific value and parses it.
+--The "do" notation is the magic spell that enables us to parse strings:
+--Example:	do {item; c <- item; return c}
+--The code above can be interpreted in the following way:
+--1.	parse the first character of the string;
+--2.	parse the second character of the string and give it the name of c;
+--3.	return the generic Parser c (imagine it as a box that parses always the character c for whatever string we pass
+--	to it)
 
---Now we make
+--CONDITIONAL PARSERS
+
+--Now we make Parser an instance of MonadZero and MonadPlus
+--This means we equip it with a binary operator "plus" (++) and a "zero" element
+--The "zero" element and the operator ++ satisfy:
+--1.	zero ++ p 	= p
+--2.	p ++ zero 	= p
+--3.	p ++ (q ++ r)	= (p ++ q) ++ r
+--That is to say that "zero" element is the identity element with respect to ++, and the plus operator is associative
+--These properties are also valid:
+--1.	zero >>= fun			= zero
+--2.	par >>= const zero		= zero
+--3.	(p ++ q) >>= fun		= (p >>= fun) ++ (q >>= fun)
+--4.	par >>= (\v -> f v ++ g v)	= (par >>= f) ++ (par >>= g)
+--"zero" is the right and left zero element for the operator >>=
+--(>>=) distributes through (++) both on the right and on the left
+instance MonadZero Parser where
+ zero = Parser $ (\s -> [])
+--The plus operator combines the results from the two parsers involved
+instance MonadPlus Parser where
+ p ++ q = Parser $ (\s -> p s ++ q s) 
+
+
+--The operator (+++) allow us to parse a string in two different ways. It then returns the first available result (if
+--there is one)
+(+++) :: Parser a -> Parser a -> Parser a
+p +++ q = Parser $ (\s -> case (p ++ q) of
+ [] -> []
+ (f:r) -> [f])
+
+
+--sat takes a predicate on characters as its input and returns:
+--	the parsed char if it satisfies pred
+--	the Parser "zero" (aka failure) otherwise
+--one can now define specific parsers by passing the right predicate as a parameter
+--Example: sat (== c) is the Parser for the specific character c 
+sat :: (Char -> Bool) -> Parser Char
+sat pred = do
+ ch <- item
+ if pred ch then return ch else zero
+
+
+--Parser for a specific character
+char :: Char -> Parser Char
+char ch = sat (== ch)
+
+
+--RECURSION COMBINATORS
+
+
+--string is a Parser for a specific String
+string :: String -> Parser String
