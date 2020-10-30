@@ -252,3 +252,37 @@ eatLeadingSpaces :: Parser a -> Parser a
 eatLeadingSpaces p = do
  space
  p
+
+
+--EXAMPLE
+
+
+--Suppose we define the following syntax for our language (this syntax actually models arithmetic expressions):
+--
+--
+--expr 		::= expr addop term | term
+--term 		::= term multop factor | factor
+--factor	::= digit | (expr)
+--digit		::= 0 | 1 | ... | 9
+--
+--addop		::= + | -
+--multop	::= * | /
+--
+--
+--The syntax is ordered by the priority of evaluation: the higher a syntax token is, the lower its evaluation priority i
+--s
+
+
+expr :: Parser Int
+expr 	= term `chainl_aux` addop
+term 	= factor `chainl_aux` multop
+factor 	= digit +++ do{ symb "("; n <- expr; symb ")"; return n }
+digit	= do
+ x <- token (sat isDigit)
+ return (ord x - ord '0')
+
+addop :: Parser (Int -> Int -> Int)
+addop = do { symb "+"; return (+) } +++ do { symb "-"; return (-) }
+
+multop :: Parser (Int -> Int -> Int)
+multop = do { symb "*"; return (*) } +++ do { symb "/"; return (div) }
