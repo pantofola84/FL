@@ -273,6 +273,11 @@ eatLeadingSpaces p = do
 --s
 
 
+--Example usage:
+--
+--	apply expr "1+2*(4-3)"
+
+
 expr :: Parser Int
 expr 	= term `chainl_aux` addop
 term 	= factor `chainl_aux` multop
