@@ -1,0 +1,5 @@
+Show why outermost evaluation is preferable to innermost for the purposes of evaluating the expression "fst(1 + 2, 2 + 3)"
+
+
+If we use the innermost evaluation strategy this means that both the parameters will be completely evaluated before being passed to "fst". The second parameter could have been an infinite list: boom, non-termination!.
+If we use outermost evaluation then the second parameter isn't even touched, and the scenario presented above cannot happen.

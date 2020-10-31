@@ -1,0 +1,20 @@
+Identify the redexes in the following expressions, and determine whether each redex is innermost, outermost, neither or both:
+
+
+1.	"1 + (2 * 3)"
+(2 * 3) is a redex and is innermost
+1 + x is the second and outermost redex
+
+
+2.	"(1 + 2) * (2 + 3)"
+There are two innermost redexes [(1 + 2) and (2 + 3)] and an outermost one, the * operator
+
+
+3.	"fst(1 + 2, 2 + 3)"
+Same as above, except that the outermost redex is now the "fst" function
+
+
+4.	"(\x -> 1 + x) (2 + 3)"
+There are three redexes: the external sum (2 + 3), the lambda and the internal sum (1 + x).
+(2 + 3) is an innermost redex while the lambda is an outermost one.
+1 + x isn't considered by Haskell as a redex in this first phase of evaluation because it is inside a function 

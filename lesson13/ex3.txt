@@ -1,0 +1,17 @@
+Given the definition
+
+	mult = \x -> (\y -> x * y)
+
+show how the evaluation of 
+	
+	mult 3 4
+
+can be broken down into four separate steps
+
+
+
+1a.	mult 3 4 			=
+1b.	(\x ->(\y -> x * y)) 3 4	=
+2.	(\y -> 3 * y) 4			=
+3.	3 * 4				=
+4.	12
