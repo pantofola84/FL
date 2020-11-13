@@ -134,7 +134,7 @@ check :: Conf -> Int -> [Move] -> (Report, Int, [Move], Conf)
 check configuration movesSoFar [] = (Ok, movesSoFar, [], configuration)
 --If the list of Moves contains at least one Move, we need to check that Move. Now:
 --	the Move is invalid =>	we return a tuple containing a "Bad" Report, the total number of moves (aka the previous 
---				one + 1), a list containing our bad guy and the final configuration reached
+--				one), a list containing our bad guy and the final configuration reached
 --	the Move is valid =>	we call check recursively with updated inputs
 check configuration movesSoFar (m:ms)
  | isValid configuration m = check (performMove configuration m) (movesSoFar + 1) ms
