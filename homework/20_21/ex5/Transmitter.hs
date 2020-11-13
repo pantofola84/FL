@@ -14,7 +14,7 @@ bin2int = foldr (\x y -> x + 2*y) 0
 --Given function that converts an Int into the corresponding sequence of Bits
 int2bin :: Int -> [Bit]
 int2bin 0 = []
-int2bin n = n mod 2 : int2bin (n div 2)
+int2bin n = n `mod` 2 : int2bin (n `div` 2)
 
 
 --Takes a list of Bits and prepends to it the correct parity bit
@@ -40,7 +40,7 @@ make8 bits = take 8 (bits ++ repeat 0)
 --OUTPUT
 --	the correct list of Bits that represents the encoding of the given string
 encode :: String -> [Bit]
-encode = concat . map (addParity . make8 . int2bin . ord)
+encode = concat . map (prependParityBit . make8 . int2bin . ord)
 
 
 --Takes a list of Bits and splits it into a list of lists of 9 Bits
@@ -89,23 +89,60 @@ decode :: [Bit] -> String
 decode = map (chr . bin2int) . checkParityInList . chop9
 
 
---
+--Takes a Bit and inverts it
+--INPUT:
+--	a single Bit
+--OUTPUT:
+--	the inverted Bit
 flipBit :: Bit -> Bit
 flipBit i = abs (i - 1)
 
-listOfSum :: [Int] -> [Int]
-listOfSum l = [sum (take i l) | i <- [1,2..length l]] 
 
-modify :: Int -> [Bit] -> [Bit]
-modify i bs = take i bs ++ [flipBit (bs !! i)] ++ drop (i + 1) bs
+--Takes a list and computes the required list of indexes
+--INPUT:
+--	a list of Int [i0, i1, ..., ik]
+--OUTPUT:
+--	a list of indexes [i0, i0 + i1, i0 + i1 + i2, ..., i0 + ... + ik]
+listOfIndexes :: [Int] -> [Int]
+listOfIndexes l = [sum (take i l) | i <- [1,2..length l]] 
 
-flipByIndex :: [Int] -> [Bit] -> [Bit]
-flipByIndex [] bs = bs
-flipByIndex i [] = []
-flipByIndex (i:is) bs = flipByIndex is (modify i bs)
 
+--Takes an index and a list of Bits, and inverts the Bit at the specified index
+--INPUT:
+--	the index of the Bit that has to be inverted
+--	a list of Bits
+--OUTPUT:
+--	the original list, but now the Bit at the specified index is inverted
+flipBitOnList :: Int -> [Bit] -> [Bit]
+flipBitOnList i bl = take i bl ++ [flipBit (bl !! i)] ++ drop (i + 1) bl
+
+
+--Takes a list of indexes and a list of Bits, inverts the corresponding Bits
+--INPUT:
+--	a list of indexes
+--	a list of Bits
+--OUTPUT:
+--	a list of Bits: Bits located at specified indexes are now inverted
+flipBitsOnListByIndex :: [Int] -> [Bit] -> [Bit]
+flipBitsOnListByIndex [] bl = bl
+flipBitsOnListByIndex i [] = []
+flipBitsOnListByIndex (i:is) bl = flipBitsOnListByIndex is (flipBitOnList i bl)
+
+
+--Takes a list of Int and a list of Bits, computes indexes and inverts the corresponding Bits
+--INPUT:
+--	a list of Int from which the indexes will be computed
+--	a list of Bits
+--OUTPUT:
+--	the correct list with specified Bits inverted
 channel :: [Int] -> [Bit] -> [Bit]
-channel ns xs = flipByIndex (listOfSum ns) xs
+channel nl bl = flipBitsOnListByIndex (listOfIndexes nl) bl
 
+
+--Simulates the transmission on the channel
+--INPUT:
+--	a list of Int from which the indexes will be computed
+--OUTPUT:
+--	the string obtained after the encoding, the transmission and subsequent decoding
 transmit :: [Int] -> String -> String
-transmit ns = decode .(channel ns). encode
+transmit nl = decode .(channel nl). encode
