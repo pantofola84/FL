@@ -150,7 +150,31 @@ play2 movesList = \c -> do
 
 --------------------------PLAY3-----------------------------------------------------------------------------------------
 
+--Takes a Conf and a Move and applies the Move to the Configuration. If the result is valid returns the new Conf within 
+--a Just, or Nothing otherwise
+--INPUT:
+--	a starting configuration
+--	a Move
+--OUTPUT:
+--	the resulting configuration within a Just if everything is OK, Nothing otherwise
+performMove3 :: Conf -> Move -> Maybe Conf
+performMove3 (left, right) (howmany, whichside) = case whichside of
+ 'L' -> if isDifferenceGreaterThan4 howmany left right then Nothing else Just (safePlus left howmany, right)
+ 'R' -> if isDifferenceGreaterThan4 howmany right left then Nothing else Just (left, safePlus right howmany)
 
+
+--Takes a Maybe Conf and a list of Moves and computes a Maybe containing the list of Confs reachable from the starting c
+--onfiguration when one applies every Move in the list
+--INPUT:
+--	a Maybe containing the starting configuration
+--	a list of Moves
+--OUTPUT:
+--	a Maybe containing the list of Confs reached from the first by applying every Move in the list
+play3 :: Maybe Conf -> [Move] -> Maybe [Conf]
+play3 Nothing _ = Nothing
+play3 (Just startingConfiguration) [] = Just []
+play3 (Just startingConfiguration) (fm : rms) = (:)<$>appliedMove<*>(play3 appliedMove rms)
+ where appliedMove = performMove3 startingConfiguration fm 
 
 
 --------------------------PLAY3-----------------------------------------------------------------------------------------
