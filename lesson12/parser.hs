@@ -51,6 +51,7 @@ newtype Parser t = Parser (String -> [(t, String)])
 apply :: Parser a -> String -> [(a, String)]
 apply (Parser f) = f
 
+
 instance Monad Parser where
  return v 	= Parser $ (\s -> [(v, s)])
  par >>= fun 	= Parser $ (\str -> concat [apply (fun res) str' | (res, str') <- (apply par str)])
@@ -70,6 +71,7 @@ instance Applicative Parser where
 instance Alternative Parser where
  (<|>)	= mplus
  empty	= mzero
+
 
 --item is a Parser for Char
 --item takes a String and behaves in the following way:
