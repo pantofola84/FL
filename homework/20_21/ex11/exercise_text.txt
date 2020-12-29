@@ -4,4 +4,5 @@ Consider expressions built up from natural numbers using a subtraction operator 
 .
 
 a.	Translate this description directly into a grammar.		DONE
-b.	Implement this grammar as a Parser "expr :: Parser Int".	
+b.	Implement this grammar as a Parser "expr :: Parser Int".	DONE
+c.	What is the problem with this parser?				DONE	
