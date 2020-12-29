@@ -3,4 +3,5 @@ EXERCISE 11
 Consider expressions built up from natural numbers using a subtraction operator that is assumed to associate to the left
 .
 
-a.	Translate this description directly into a grammar.
+a.	Translate this description directly into a grammar.		DONE
+b.	Implement this grammar as a Parser "expr :: Parser Int".	
