@@ -6,3 +6,5 @@ Consider expressions built up from natural numbers using a subtraction operator 
 a.	Translate this description directly into a grammar.		DONE
 b.	Implement this grammar as a Parser "expr :: Parser Int".	DONE
 c.	What is the problem with this parser?				DONE	
+d.	Show how it can be fixed. Hint: rewrite the parser using the repetition primitive "many" and the library functio
+	n "foldl".							DONE

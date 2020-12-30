@@ -8,7 +8,8 @@ import Data.Char
 
 --1.	Copy all Parser definitions and various utilities (as explained on chapter 13 of the book).	DONE
 --2.	Define the "wrong" Parser.									DONE
-
+--3.	Define the "right" Parser.									DONE
+--4.	Write the "main" function.									DONE
 
 -----------------------PARSER DEFINITIONS AND UTILITIES-----------------------------------------------------------------
 
@@ -115,7 +116,7 @@ space = do
 
 --"int" exploits the fact that a Parser is also an Alternative to obtain a Parser for integers
 int :: Parser Int
-int = (do {char '-'; n <- nat; return (-n)}) <|> nat
+int = (do {char '-'; space; n <- nat; return (-n)}) <|> nat
 
 
 --"token" is a function that takes a Parser and allows it to ignore any space character placed before and/or after the a
@@ -146,3 +147,28 @@ symbol s = token (string s)
 --The most immediate way to write a Parser for our grammar (following close what is done in the reference book) is this:
 --expr :: Parser Int
 --expr = (do {e <- expr; symbol "-"; n <- natural; return (e - n)}) <|> natural
+
+
+--"expr" creates a Parser for Int in the following way:
+--1.	it uses "many" to obtain a list of integers from the input string, effectively parsing the string
+--2.	combines with each other the Parsers for the expression using the function "foldl", in order to follow the assoc
+--	iativity of the operator "-"
+--NOTE: the Parser returned from the "foldl" function doesn't consume any part of the input string. The effective consum
+--ption happens in the first part of the statement	
+expr :: Parser Int
+expr = P $ (\s -> let [(l, s1)] = parse (many integer) s in
+ parse (foldl parserCombine (return 0) l) s1)
+
+
+--This function combines a Parser for integer with a new integer by simply applying the Parser in order to obtain the va
+--lue ("r") and adding it to the provided parameter
+parserCombine :: Parser Int -> Int -> Parser Int
+parserCombine p i = do
+ r <- p
+ return (r + i)
+
+
+main :: IO ()
+main = do
+ l <- getLine
+ print (parse expr l)
