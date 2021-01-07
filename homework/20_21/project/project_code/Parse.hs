@@ -1,15 +1,9 @@
-module Main where
+module Parse where
 
 
 import Control.Applicative
 import Control.Monad
 import Data.Char
-
-
---1.	Copy all Parser definitions and various utilities (as explained on chapter 13 of the book).	DONE
---2.	Define the "wrong" Parser.									DONE
---3.	Define the "right" Parser.									DONE
---4.	Write the "main" function.									DONE
 
 
 -----------------------PARSER DEFINITIONS AND UTILITIES-----------------------------------------------------------------
@@ -88,6 +82,22 @@ digit :: Parser Char
 digit = sat isDigit
 
 
+lower :: Parser Char
+lower = sat isLower
+
+
+upper :: Parser Char
+upper = sat isUpper
+
+
+letter :: Parser Char
+letter = sat isAlpha
+
+
+alphanum :: Parser Char
+alphanum = sat isAlphaNum
+
+
 char :: Char -> Parser Char
 char c = sat (== c)
 
@@ -106,6 +116,14 @@ nat :: Parser Int
 nat = do
  xs <- some digit
  return (read xs)
+
+
+--"ident" is a Parser for identifier composed by a lower alphabetic character followed by 0 or more alphanumeric characters
+ident :: Parser String
+ident = do
+ x <- lower
+ xs <- many alphanum
+ return (x:xs)
 
 
 --"space" is a Parser that consumes zero or more space characters
@@ -141,35 +159,9 @@ integer = token int
 symbol :: String -> Parser String
 symbol s = token (string s)
 
- 
+identifier :: Parser String
+identifier = token ident
+
+
 ------------------------------------------------------------------------------------------------------------------------
 
-
---The most immediate way to write a Parser for our grammar (following close what is done in the reference book) is this:
---expr :: Parser Int
---expr = (do {e <- expr; symbol "-"; n <- natural; return (e - n)}) <|> natural
-
-
---"expr" creates a Parser for Int in the following way:
---1.	it uses "many" to obtain a list of integers from the input string, effectively parsing the string
---2.	combines with each other the Parsers for the expression using the function "foldl", in order to follow the assoc
---	iativity of the operator "-"
---NOTE: the Parser returned from the "foldl" function doesn't consume any part of the input string. The effective consum
---ption happens in the first part of the statement	
-expr :: Parser Int
-expr = P $ (\s -> let [(l, s1)] = parse (many integer) s in
- parse (foldl parserCombine (return 0) l) s1)
-
-
---This function combines a Parser for integer with a new integer by simply applying the Parser in order to obtain the va
---lue ("r") and adding it to the provided parameter
-parserCombine :: Parser Int -> Int -> Parser Int
-parserCombine p i = do
- r <- p
- return (r + i)
-
-
-main :: IO ()
-main = do
- l <- getLine
- print (parse expr l)

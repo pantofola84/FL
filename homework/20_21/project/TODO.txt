@@ -1,0 +1,8 @@
+1.	Insert into the Parse module all useful definitions for the parser, as reported in chapter 13 of the text book (as th
+	e implementation of the project proceeds, a little tuning on definitions maybe needed)	DONE;
+2. 	Copy into the ParseProg module all the type definitions for the specific parser for CorePrograms;
+3. 	Study the chapter 1.6 of the textbook;
+4. 	Implement all the required functions;
+5. 	Test the first part of the Parser by comparing local results with the output of provided tests;
+6. 	Read and understand what is needed for the second part of the project;
+7. 	Implement the second part of the project.
