@@ -2,6 +2,7 @@
 	e implementation of the project proceeds, a little tuning on definitions maybe needed)			DONE
 2. 	Copy into the ParseProg module all the type definitions for the specific parser for CorePrograms;	DONE
 3. 	Study the chapter 1.6 of the textbook;
+	a.	Study and implement the lexical analysis tool
 4. 	Implement all the required functions;
 5. 	Test the first part of the Parser by comparing local results with the output of provided tests;
 6. 	Read and understand what is needed for the second part of the project;
