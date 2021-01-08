@@ -86,5 +86,51 @@ type CoreProgram = Program Name
 -------------------------------------------PROJECT PART 1---------------------------------------------------------------
 
 
+--Smaller utility parsers
+
+
+
+--We need to write the following Parsers
+
+parseExpr :: Parser CoreExpr
+
+parseAExpr :: Parser CoreExpr
+
+parseDef :: Parser CoreDef
+
+--An alternative is in the form:
+--	<num> var1 ... varn -> expr
+parseAlt :: Parser CoreAlt
+parseAlt = do
+ symbol "<"
+ tag <- natural
+ symbol ">"
+ bs <- many parseVar
+ symbol "->"
+ body <- parseExpr
+ return (tag, bs, body) 
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+
+-----------------------------------------PROVIDED PARSERS---------------------------------------------------------------
+
+
+parseProg :: Parser CoreProgram
+parseProg = do
+ scd <- parseScDef
+ (do {symbol ";"; scds <-parseProg; return (scd: scds)} <|> return [scd])
+
+
+parseScDef :: Parser CoreScDefn
+parseScDef = do
+ n <- parseVar
+ vs <- many parseVar
+ symbol "="
+ body <- parseExpr
+ return (n, vs, body)
+  
 
 ------------------------------------------------------------------------------------------------------------------------
