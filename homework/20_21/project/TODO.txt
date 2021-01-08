@@ -3,11 +3,7 @@
 
 2. 	Copy into the ParseProg module all the type definitions for the specific parser for CorePrograms;	DONE
 
-3. 	Study the chapter 1.6 of the textbook;
-	a.	Study and implement the lexical analysis tool (NOTE: the last exercise of the lexical analysis paragraph
-		 has been ignored, because it has been deemed as not important: the line of a syntax error seems not to 
-		be requested in tests) REMEMBER THIS POINT IN CASE OF FAILURE					DONE
-	b.	Study the paragraph "Basic tools for parsing"
+3.	Write the requested parsers for the first part of the project;
 
 4. 	Test the first part of the Parser by comparing local results with the output of provided tests;
 
