@@ -1,9 +1,16 @@
-1.	Insert into the Parse module all useful definitions for the parser, as reported in chapter 13 of the text book (as th
-	e implementation of the project proceeds, a little tuning on definitions maybe needed)			DONE
+1.	Insert into the Parse module all useful definitions for the parser, as reported in chapter 13 of the text book (
+	as the implementation of the project proceeds, a little tuning on definitions maybe needed)		DONE
+
 2. 	Copy into the ParseProg module all the type definitions for the specific parser for CorePrograms;	DONE
+
 3. 	Study the chapter 1.6 of the textbook;
-	a.	Study and implement the lexical analysis tool
-4. 	Implement all the required functions;
-5. 	Test the first part of the Parser by comparing local results with the output of provided tests;
-6. 	Read and understand what is needed for the second part of the project;
-7. 	Implement the second part of the project.
+	a.	Study and implement the lexical analysis tool (NOTE: the last exercise of the lexical analysis paragraph
+		 has been ignored, because it has been deemed as not important: the line of a syntax error seems not to 
+		be requested in tests) REMEMBER THIS POINT IN CASE OF FAILURE					DONE
+	b.	Study the paragraph "Basic tools for parsing"
+
+4. 	Test the first part of the Parser by comparing local results with the output of provided tests;
+
+5. 	Read and understand what is needed for the second part of the project;
+
+6. 	Implement the second part of the project.
