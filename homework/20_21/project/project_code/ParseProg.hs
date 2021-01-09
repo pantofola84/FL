@@ -168,14 +168,6 @@ parseLambda = do
  return (ELam vs expr) 
  
 
---Pre-processing for backslash characters in order to make them parsable
-preProcessingBackslash :: String -> String
-preProcessingBackslash [] = []
-preProcessingBackslash (c: cs)
- | c == '\\' = '\\': '\\': preProcessingBackslash cs
- | otherwise = c: preProcessingBackslash cs
-
-
 ------------------------------------------------------------------------------------------------------------------------
 
 
