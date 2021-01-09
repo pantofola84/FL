@@ -3,10 +3,14 @@
 
 2. 	Copy into the ParseProg module all the type definitions for the specific parser for CorePrograms;	DONE
 
-3.	Write the requested parsers for the first part of the project;
+3.	Write the requested parsers for the first part of the project;						DONE
 
-4. 	Test the first part of the Parser by comparing local results with the output of provided tests;
+4.	Build and solve compilation errors;
 
-5. 	Read and understand what is needed for the second part of the project;
+5. 	Test the first part of the Parser by comparing local results with the output of provided tests;
 
-6. 	Implement the second part of the project.
+6.	Solve all eventual logic errors that occur;
+
+7. 	Read and understand what is needed for the second part of the project;
+
+8. 	Implement the second part of the project.

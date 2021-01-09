@@ -118,11 +118,12 @@ nat = do
  return (read xs)
 
 
---"ident" is a Parser for identifier composed by a lower alphabetic character followed by 0 or more alphanumeric characters
+--"ident" is a Parser for identifier composed by an alphabetic character followed by 0 or more alphanumeric characters o
+--r the character '_'
 ident :: Parser String
 ident = do
- x <- lower
- xs <- many alphanum
+ x <- letter
+ xs <- many varch
  return (x:xs)
 
 
@@ -162,6 +163,13 @@ symbol s = token (string s)
 identifier :: Parser String
 identifier = token ident
 
+character :: Char -> Parser Char
+character c = token (char c)
+
 
 ------------------------------------------------------------------------------------------------------------------------
 
+
+--Parses an alphanumeric character or the character '_'
+varch :: Parser Char
+varch = alphanum <|> char '_'

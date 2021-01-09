@@ -83,20 +83,134 @@ type CoreProgram = Program Name
 
 
 
+-------------------------------------------UTILITY PARSERS--------------------------------------------------------------
+
+
+--Parser for EVar
+parseEVar :: Parser CoreExpr
+parseEVar = do
+ v <- identifier
+ return (EVar $ v)
+
+
+--Parser for ENum
+parseENum :: Parser CoreExpr
+parseENum = do
+ n <- natural
+ return (ENum $ n)
+
+
+--Parser for EConstr
+parseEConstr :: Parser CoreExpr
+parseEConstr = do
+ symbol "Pack{"
+ tag <- natural
+ symbol ","
+ arity <- natural
+ symbol "}"
+ return (EConstr tag arity)
+
+
+--Parser for parenthesized expressions
+parseParenthesizedExpr :: Parser CoreExpr
+parseParenthesizedExpr = do
+ symbol "("
+ expr <- parseExpr
+ symbol ")"
+ return expr
+
+
+--Takes a (Parser t) and a String and returns a (Parser [t]). It looks for a sequence of one or more tokens separated by
+-- the provided String
+someSeparatedBy :: Parser a -> String -> Parser [a]
+someSeparatedBy p s = do
+ v <- p
+ (do {symbol s; vs <- someSeparatedBy p s; return (v: vs)} <|> return [v])
+
+
+--Parser for "let" expressions
+parseLet :: Parser CoreExpr
+parseLet = do
+ symbol "let"
+ defns <- someSeparatedBy parseDef ";"
+ symbol "in"
+ expr <- parseExpr
+ return (ELet nonRecursive defns expr)
+
+
+--Parser for "letrec" expressions
+parseLetRec :: Parser CoreExpr
+parseLetRec = do
+ symbol "letrec"
+ defns <- someSeparatedBy parseDef ";"
+ symbol "in"
+ expr <- parseExpr
+ return (ELet recursive defns expr)
+
+
+--Parser for "let" and "letrec" expressions
+parseLocal :: Parser CoreExpr
+parseLocal = parseLet <|> parseLetRec
+
+
+--Parser for "case" expressions
+parseCase :: Parser CoreExpr
+parseCase = do
+ symbol "case"
+ expr <- parseExpr
+ symbol "of"
+ alts <- someSeparatedBy parseAlt ";"
+ return (ECase expr alts)
+
+
+--Parser for lambda abstractions
+parseLambda :: Parser CoreExpr
+parseLambda = do
+ character '\'
+ vs <- some identifier
+ symbol "."
+ expr <- parseExpr
+ return (ELam vs expr) 
+ 
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+
 -------------------------------------------PROJECT PART 1---------------------------------------------------------------
-
-
---Smaller utility parsers
-
 
 
 --We need to write the following Parsers
 
+--For the first part of the project we parse only the last four productions for Expr, namely:
+--	a "let" expression in the form:	let defns in expr
+--	a "letrec" expression in the form:	letrec defns in expr
+--	a "case" expression in the form:	case expr of alts
+--	a lambda expression in the form:	\ var1 ... varn . expr
+--An Expr can also be an atomic expression AExpr
 parseExpr :: Parser CoreExpr
+parseExpr = (parseLocal <|> parseCase) <|> (parseLambda <|> parseAExpr)
 
+
+--An atomic expression can be in the form:
+--	variable (we already have the Parser "identifier")
+--	number (we already have the Parser "natural")
+--	Pack{num, num}
+--	(expr)
+--"parseAExpr" becomes simply a list of the corresponding four utility parsers
 parseAExpr :: Parser CoreExpr
+parseAExpr = (parseEVar <|> parseENum) <|> (parseEConstr <|> parseParenthesizedExpr)
 
+
+--A definition is in the form:
+--	var = expr
 parseDef :: Parser CoreDef
+parseDef = do
+ v <- identifier
+ symbol "="
+ expr <- parseExpr
+ return (v, expr)
+
 
 --An alternative is in the form:
 --	<num> var1 ... varn -> expr
@@ -105,7 +219,7 @@ parseAlt = do
  symbol "<"
  tag <- natural
  symbol ">"
- bs <- many parseVar
+ bs <- many identifier
  symbol "->"
  body <- parseExpr
  return (tag, bs, body) 
@@ -115,7 +229,13 @@ parseAlt = do
 
 
 
------------------------------------------PROVIDED PARSERS---------------------------------------------------------------
+-----------------------------------------PROVIDED FUNCTIONS-------------------------------------------------------------
+
+
+comp :: [(CoreProgram, Name)] -> CoreProgram
+comp [] = error "no parse"
+comp [(cp, "")] = cp
+comp [(_, rs)] = error ("doesn't use all input" ++ rs)
 
 
 parseProg :: Parser CoreProgram
@@ -126,8 +246,8 @@ parseProg = do
 
 parseScDef :: Parser CoreScDefn
 parseScDef = do
- n <- parseVar
- vs <- many parseVar
+ n <- identifier
+ vs <- many identifier
  symbol "="
  body <- parseExpr
  return (n, vs, body)
