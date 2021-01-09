@@ -27,14 +27,8 @@ type Alter a = (Int, [a], Expr a)
 type CoreAlt = Alter Name
 
 
---"isRec" is a simple alias for the boolean type
-type IsRec = Bool
-
-recursive :: IsRec
-recursive = True
-
-nonRecursive :: IsRec
-nonRecursive = False
+--"isRec" tells us if we are in front of a "let" expression or a "letrec" expression
+data IsRec = Recursive | NonRecursive deriving Show
 
 
 --Expr represents the expression production of the Core Language
@@ -136,7 +130,7 @@ parseLet = do
  defns <- someSeparatedBy parseDef ";"
  symbol "in"
  expr <- parseExpr
- return (ELet nonRecursive defns expr)
+ return (ELet NonRecursive defns expr)
 
 
 --Parser for "letrec" expressions
@@ -146,7 +140,7 @@ parseLetRec = do
  defns <- someSeparatedBy parseDef ";"
  symbol "in"
  expr <- parseExpr
- return (ELet recursive defns expr)
+ return (ELet Recursive defns expr)
 
 
 --Parser for "let" and "letrec" expressions
@@ -167,12 +161,20 @@ parseCase = do
 --Parser for lambda abstractions
 parseLambda :: Parser CoreExpr
 parseLambda = do
- character '\\'
+ symbol "\\"
  vs <- some identifier
  symbol "."
  expr <- parseExpr
  return (ELam vs expr) 
  
+
+--Pre-processing for backslash characters in order to make them parsable
+preProcessingBackslash :: String -> String
+preProcessingBackslash [] = []
+preProcessingBackslash (c: cs)
+ | c == '\\' = '\\': '\\': preProcessingBackslash cs
+ | otherwise = c: preProcessingBackslash cs
+
 
 ------------------------------------------------------------------------------------------------------------------------
 

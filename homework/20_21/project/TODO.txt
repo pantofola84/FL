@@ -7,10 +7,12 @@
 
 4.	Build and solve compilation errors;									DONE
 
-5. 	Test the first part of the Parser by comparing local results with the output of provided tests;
+5. 	Test the first part of the Parser and solve all the eventual logical errors;				DONE
 
-6.	Solve all eventual logic errors that occur;
+6. 	Read and understand what is needed for the second part of the project;
 
-7. 	Read and understand what is needed for the second part of the project;
+7. 	Implement the second part of the project;
 
-8. 	Implement the second part of the project.
+8.	Build and solve compilation errors;
+
+9.	Test and solve all the eventual logical errors.
