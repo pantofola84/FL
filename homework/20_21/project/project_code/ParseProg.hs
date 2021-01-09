@@ -2,6 +2,7 @@ module ParseProg where
 
 
 import Parse
+import Control.Applicative
 
 
 ------------TYPE DEFINITIONS FOR THE CORE LANGUAGE----------------------------------------------------------------------
@@ -27,12 +28,12 @@ type CoreAlt = Alter Name
 
 
 --"isRec" is a simple alias for the boolean type
-type isRec = Bool
+type IsRec = Bool
 
-recursive :: isRec
+recursive :: IsRec
 recursive = True
 
-nonRecursive :: isRec
+nonRecursive :: IsRec
 nonRecursive = False
 
 
@@ -55,7 +56,7 @@ data Expr a = EVar Name
  | ENum Int
  | EConstr Int Int
  | EAp (Expr a) (Expr a)
- | ELet isRec [Def a] (Expr a)
+ | ELet IsRec [Def a] (Expr a)
  | ECase (Expr a) [Alter a]
  | ELam [a] (Expr a)
  deriving Show
@@ -125,7 +126,7 @@ parseParenthesizedExpr = do
 someSeparatedBy :: Parser a -> String -> Parser [a]
 someSeparatedBy p s = do
  v <- p
- (do {symbol s; vs <- someSeparatedBy p s; return (v: vs)} <|> return [v])
+ ((do {symbol s; vs <- someSeparatedBy p s; return (v: vs)}) <|> return [v])
 
 
 --Parser for "let" expressions
@@ -166,7 +167,7 @@ parseCase = do
 --Parser for lambda abstractions
 parseLambda :: Parser CoreExpr
 parseLambda = do
- character '\'
+ character '\\'
  vs <- some identifier
  symbol "."
  expr <- parseExpr

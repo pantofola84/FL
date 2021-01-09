@@ -5,7 +5,7 @@
 
 3.	Write the requested parsers for the first part of the project;						DONE
 
-4.	Build and solve compilation errors;
+4.	Build and solve compilation errors;									DONE
 
 5. 	Test the first part of the Parser by comparing local results with the output of provided tests;
 
