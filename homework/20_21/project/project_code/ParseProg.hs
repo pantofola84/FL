@@ -78,14 +78,21 @@ type CoreProgram = Program Name
 
 
 
--------------------------------------------UTILITY PARSERS--------------------------------------------------------------
+-------------------------------------------UTILITY FUNCTIONS------------------------------------------------------------
+
+
+--A list of all Core Language keywords that can be mistaken as variables
+keywordsList :: [String]
+keywordsList = ["let", "in", "letrec", "case", "of"]
 
 
 --Parser for EVar
+--If the parsed identifier belongs to the list "keywordsList" it means that we have just read a keyword of the Core Lang
+--uage: we can't create a variable with the same name of a keyword, so we make the Parser fail
 parseEVar :: Parser CoreExpr
 parseEVar = do
  v <- identifier
- return (EVar $ v)
+ if (v `elem` keywordsList) then empty else return (EVar $ v)
 
 
 --Parser for ENum
@@ -168,11 +175,66 @@ parseLambda = do
  return (ELam vs expr) 
  
 
+--Takes a list of CoreExpr and:
+--	if it is a singleton, simply extract the expression from the list
+--	otherwise combines all the various expression with the EAp constructor, associating to the left
+makeAp :: [CoreExpr] -> CoreExpr
+makeAp (ae: aes)
+ | aes == [] = ae
+ | otherwise = foldl EAp (EAp ae ae2) rest_aes
+  where ae2 = head aes
+  rest_aes = tail aes
+
+
+--Parser for an expression in the form:
+--	aexpr1 ... aexprn (n >= 1)
+--If n = 1 this case is the same as the one in which expr is a simple aexpr
+--If n > 1 it's the application
+parseAexprSeq :: Parser CoreExpr
+parseAexprSeq = fmap makeAp (some parseAExpr)
+
+
+--Takes an operator and two expressions and creates the corresponding CoreExpr
+composeOp :: String -> CoreExpr -> CoreExpr -> CoreExpr
+composeOp op e1 e2 = EAp (EAp (EVar op) (e1)) (e2)
+
+
+--Parser for operators with a precedence level of 1
+parse1 :: Parser CoreExpr
+parse1 = (do {e2 <- parse2; symbol "|"; e1 <- parse1; return (composeOp "|" e2 e1)}) <|> parse2
+
+
+--Parser for operators with a precedence level of 2
+parse2 :: Parser CoreExpr
+parse2 = (do {e3 <- parse3; symbol "&"; e2 <- parse2; return (composeOp "&" e3 e2)}) <|> parse3
+
+
+--Parser for operators with a precedence level of 3
+parse3 :: Parser CoreExpr
+parse3 = (do
+ e4a <- parse4
+ op <- (((symbol "==" <|> symbol "~=") <|> symbol "<=") <|> ((symbol ">=" <|> symbol "<") <|> symbol ">"))
+ e4b <- parse4
+ return (composeOp op e4a e4b)) <|> parse4
+
+
+--Parser for operators with precedence level of 4
+parse4 :: Parser CoreExpr
+parse4 = ((do {e5 <- parse5; symbol "+"; e4 <- parse4; return (composeOp "+" e5 e4)})
+ <|> (do {e5a <- parse5; symbol "-"; e5b <- parse5; return (composeOp "-" e5a e5b)})) <|> parse5
+
+
+--Parser for operators with precedence level of 5
+parse5 :: Parser CoreExpr
+parse5 = ((do {o1 <- parseAexprSeq; symbol "*"; o2 <- parse5; return (composeOp "*" o1 o2)})
+ <|> (do {o1 <- parseAexprSeq; symbol "/"; o2 <- parseAexprSeq; return (composeOp "/" o1 o2)})) <|> parseAexprSeq
+
+
 ------------------------------------------------------------------------------------------------------------------------
 
 
 
--------------------------------------------PROJECT PART 1---------------------------------------------------------------
+--------------------------------------------PROJECT PARSERS-------------------------------------------------------------
 
 
 --We need to write the following Parsers
@@ -184,7 +246,7 @@ parseLambda = do
 --	a lambda expression in the form:	\ var1 ... varn . expr
 --An Expr can also be an atomic expression AExpr
 parseExpr :: Parser CoreExpr
-parseExpr = (parseLocal <|> parseCase) <|> (parseLambda <|> parseAExpr)
+parseExpr = (parseLocal <|> parseCase) <|> (parseLambda <|> parse1)
 
 
 --An atomic expression can be in the form:

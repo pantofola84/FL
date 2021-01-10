@@ -9,9 +9,9 @@
 
 5. 	Test the first part of the Parser and solve all the eventual logical errors;				DONE
 
-6. 	Read and understand what is needed for the second part of the project;
+6. 	Read and understand what is needed for the second part of the project;					DONE
 
-7. 	Implement the second part of the project;
+7. 	Implement the second part of the project;								DONE
 
 8.	Build and solve compilation errors;
 
