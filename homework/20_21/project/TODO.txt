@@ -13,6 +13,6 @@
 
 7. 	Implement the second part of the project;								DONE
 
-8.	Build and solve compilation errors;
+8.	Build and solve compilation errors;									DONE
 
 9.	Test and solve all the eventual logical errors.

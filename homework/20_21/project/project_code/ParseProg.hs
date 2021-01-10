@@ -179,11 +179,8 @@ parseLambda = do
 --	if it is a singleton, simply extract the expression from the list
 --	otherwise combines all the various expression with the EAp constructor, associating to the left
 makeAp :: [CoreExpr] -> CoreExpr
-makeAp (ae: aes)
- | aes == [] = ae
- | otherwise = foldl EAp (EAp ae ae2) rest_aes
-  where ae2 = head aes
-  rest_aes = tail aes
+makeAp (ae: [])= ae
+makeAp (ae1: ae2: aes) = foldl EAp (EAp ae1 ae2) aes
 
 
 --Parser for an expression in the form:
