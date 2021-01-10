@@ -28,7 +28,7 @@ type CoreAlt = Alter Name
 
 
 --"isRec" tells us if we are in front of a "let" expression or a "letrec" expression
-data IsRec = Recursive | NonRecursive deriving Show
+data IsRec = Recursive | NonRecursive deriving (Show, Eq)
 
 
 --Expr represents the expression production of the Core Language
@@ -83,7 +83,7 @@ type CoreProgram = Program Name
 
 --A list of all Core Language keywords that can be mistaken as variables
 keywordsList :: [String]
-keywordsList = ["let", "in", "letrec", "case", "of"]
+keywordsList = ["let", "in", "letrec", "case", "of", "Pack"]
 
 
 --Parser for EVar
@@ -286,10 +286,10 @@ parseAlt = do
 -----------------------------------------PROVIDED FUNCTIONS-------------------------------------------------------------
 
 
-comp :: [(CoreProgram, Name)] -> CoreProgram
-comp [] = error "no parse"
-comp [(cp, "")] = cp
-comp [(_, rs)] = error ("doesn't use all input" ++ rs)
+--comp :: [(CoreProgram, Name)] -> CoreProgram
+--comp [] = error "no parse"
+--comp [(cp, "")] = cp
+--comp [(_, rs)] = error ("doesn't use all input" ++ rs)
 
 
 parseProg :: Parser CoreProgram
