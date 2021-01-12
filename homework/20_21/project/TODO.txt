@@ -15,4 +15,8 @@
 
 8.	Build and solve compilation errors;									DONE
 
-9.	Test and solve all the eventual logical errors.
+9.	Test and solve all the eventual logical errors:
+9a.	Read and understand the way to make the parser more efficient;						DONE
+9b.	Modify the grammar accordingly;										
+9c.	Implement;
+9d.	Test.
