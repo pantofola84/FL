@@ -74,6 +74,14 @@ type Program a = [ScDefn a]
 type CoreProgram = Program Name
 
 
+--This type represents a partial expression in the form:
+--	op expression
+--or
+--	nothing
+--It's used to make the parser more efficient and enables to avoid recomputing the same expression multiple times
+data PartialExpression = NoOp | FoundOp Name CoreExpr
+
+
 ------------------------------------------------------------------------------------------------------------------------
 
 
@@ -196,35 +204,75 @@ composeOp :: String -> CoreExpr -> CoreExpr -> CoreExpr
 composeOp op e1 e2 = EAp (EAp (EVar op) (e1)) (e2)
 
 
---Parser for operators with a precedence level of 1
+--Takes apart the partial expression and returns the correct final CoreExpr
+assemble :: CoreExpr -> PartialExpression -> CoreExpr
+assemble firstOperand NoOp = firstOperand
+assemble firstOperand (FoundOp op secondOperand) = composeOp op firstOperand secondOperand
+
+
+--Parsers for operators with a precedence level of 1
+
 parse1 :: Parser CoreExpr
-parse1 = (do {e2 <- parse2; symbol "|"; e1 <- parse1; return (composeOp "|" e2 e1)}) <|> parse2
+parse1 = do
+ e2 <- parse2
+ pe <- ppe1
+ return (assemble e2 pe)
+
+ppe1 :: Parser PartialExpression
+ppe1 = (do {symbol "|"; e1 <- parse1; return (FoundOp "|" e1)}) <|> return NoOp
 
 
---Parser for operators with a precedence level of 2
+--Parsers for operators with a precedence level of 2
+
 parse2 :: Parser CoreExpr
-parse2 = (do {e3 <- parse3; symbol "&"; e2 <- parse2; return (composeOp "&" e3 e2)}) <|> parse3
+parse2 = do
+ e3 <- parse3
+ pe <- ppe2
+ return (assemble e3 pe)
+
+ppe2 :: Parser PartialExpression
+ppe2 = (do {symbol "&"; e2 <- parse2; return (FoundOp "&" e2)}) <|> return NoOp
 
 
---Parser for operators with a precedence level of 3
+--Parsers for operators with a precedence level of 3
+
 parse3 :: Parser CoreExpr
-parse3 = (do
- e4a <- parse4
- op <- (((symbol "==" <|> symbol "~=") <|> symbol "<=") <|> ((symbol ">=" <|> symbol "<") <|> symbol ">"))
- e4b <- parse4
- return (composeOp op e4a e4b)) <|> parse4
+parse3 = do
+ e4 <- parse4
+ pe <- ppe3
+ return (assemble e4 pe)
+
+ppe3 :: Parser PartialExpression
+ppe3 = (do
+ op <- (((symbol "==" <|> symbol "~=") <|> symbol "<") <|> ((symbol ">" <|> symbol "<=") <|> symbol ">="))
+ e4 <- parse4
+ return (FoundOp op e4)) <|> return NoOp
 
 
---Parser for operators with precedence level of 4
+--Parsers for operators with precedence level of 4
+
 parse4 :: Parser CoreExpr
-parse4 = ((do {e5 <- parse5; symbol "+"; e4 <- parse4; return (composeOp "+" e5 e4)})
- <|> (do {e5a <- parse5; symbol "-"; e5b <- parse5; return (composeOp "-" e5a e5b)})) <|> parse5
+parse4 = do
+ e5 <- parse5
+ pe <- ppe4
+ return (assemble e5 pe)
+
+ppe4 :: Parser PartialExpression
+ppe4 = ((do {symbol "+"; e4 <- parse4; return (FoundOp "+" e4)})
+ <|> (do {symbol "-"; e5 <- parse5; return (FoundOp "-" e5)})) <|> return NoOp
 
 
---Parser for operators with precedence level of 5
+--Parsers for operators with precedence level of 5
+
 parse5 :: Parser CoreExpr
-parse5 = ((do {o1 <- parseAexprSeq; symbol "*"; o2 <- parse5; return (composeOp "*" o1 o2)})
- <|> (do {o1 <- parseAexprSeq; symbol "/"; o2 <- parseAexprSeq; return (composeOp "/" o1 o2)})) <|> parseAexprSeq
+parse5 = do
+ e6 <- parseAexprSeq
+ pe <- ppe5
+ return (assemble e6 pe)
+
+ppe5 :: Parser PartialExpression
+ppe5 = ((do {symbol "*"; e5 <- parse5; return (FoundOp "*" e5)})
+ <|> (do {symbol "/"; e6 <- parseAexprSeq; return (FoundOp "/" e6)})) <|> return NoOp
 
 
 ------------------------------------------------------------------------------------------------------------------------

@@ -17,6 +17,6 @@
 
 9.	Test and solve all the eventual logical errors:
 9a.	Read and understand the way to make the parser more efficient;						DONE
-9b.	Modify the grammar accordingly;										
-9c.	Implement;
-9d.	Test.
+9b.	Modify the grammar accordingly;										DONE
+9c.	Implement;												DONE
+9d.	Test.													DONE
